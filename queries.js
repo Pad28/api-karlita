@@ -1,17 +1,11 @@
 const Pool = require('mysql')
 const pool = Pool.createConnection({
-	host:'127.0.0.1',
+	host:'tux-server.ddns.net',
 	user: 'mipap',
 	password: 'mipape281003pol',
 	database: 'law_tech',
-
 	port: 3306,
 })
-
-//
-
-
-//
 
 const createciudadano = (request, response) => {
 	const { idRol, Nombre, ApellidoPaterno, ApellidoMaterno, Telefono, Correo, Contrasena, Direccion } = request.body
@@ -78,14 +72,41 @@ const createcomentario = (request, response) => {
 	})
 }
 
+const login = async(request, response) => {
+	const { Correo, Contrasena } = request.body;
+	
+	let results = await new Promise((resolve, reject) => {
+		pool.query (`SELECT * FROM tbciudadano WHERE Correo = '${Correo}'`, (error, results) => {
+			if (error){
+				reject(error);
+			}
+			resolve(results)
+		});
+	})
 
+	if(!results[0]) {
+		results = await new Promise((resolve, reject) => {
+			pool.query (`SELECT * FROM tbabogado WHERE Correo = '${Correo}'`, (error, results) => {
+				if (error){
+					reject(error);
+				}
+				resolve(results)
+			});
+		})
+	}
+
+	if(!results[0]) return response.status(404).json({msg: "Credenciales no validas"});
+	if(results[0].Contrasena !== Contrasena) return response.status(404).json({msg: "Credenciales no validas"});
+	response.status(201).json({msg: "Autenticación exitosa"})
+}
 
 module.exports = {
      createciudadano,
      createabogado,
      createadmin,
      createcita,
-     createcomentario
+     createcomentario,
+	 login,
 }
 
 
