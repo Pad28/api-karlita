@@ -19,16 +19,18 @@ app.use(
 //create tbciudadano
 app.post('/law_tech/ciudadano', db.createciudadano);
 app.post('/law_tech/abogado', db.createabogado);
+app.get('/law_tech/abogado/:especialidad', db.getAbogadoByEspecialidad);
+
 app.post('/law_tech/admin', db.createadmin);
 
 app.post('/law_tech/cita', db.createcita);
 app.get('/law_tech/cita/:fecha/:id', db.getCitaByDate);
 app.get('/law_tech/cita/:id', db.getCitaByIdAbogado);
+
 app.get('/law_tech/citaByDates', db.getCitasByDates);
 
 app.post('/law_tech/comentario', db.createcomentario);
 app.post("/law_tech/auth/login", db.login);
-
 
 // GET Request to root URL (/)
 app.get('/', (request, response) => {

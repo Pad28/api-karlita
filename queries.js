@@ -166,6 +166,26 @@ const getCitaByIdAbogado = async(req, res) => {
 	}
 }
 
+const getAbogadoByEspecialidad = async(req, res) => {
+	const { especialidad } = req.params;
+
+	try {
+		const validators = new Validators({ especialidad });
+		validators.requiredKeys("especialidad");
+		validators.isString("especialidad");
+
+		const results = await asyncQuery(`
+			SELECT idAbogado, Nombre, ApellidoPaterno, ApellidoMaterno, Cedula, Direccion 
+			FROM tbabogado
+			WHERE especialidad = '${especialidad}';
+		`);
+
+		res.json({ results });
+	} catch (error) {
+		console.log(error);
+		return res.status(404).json({ error: error })		
+	}
+}
 
 module.exports = {
      createciudadano,
@@ -177,6 +197,7 @@ module.exports = {
 	 getCitasByDates,
 	 getCitaByDate,
 	 getCitaByIdAbogado,
+	 getAbogadoByEspecialidad,
 }
 
 

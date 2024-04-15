@@ -71,6 +71,12 @@ class Validators {
         this.isRequired(key);
         if (!pattern.test(this.data[key])) throw `${key} no válido`;
     }
+    
+    isString(key) {
+        this.isRequired(key);
+        if(typeof this.data[key] !== "string") throw `${key} no es una cadena valida`;
+        this.data[key] = this.data[key];
+    }
 }
 
 module.exports = {
