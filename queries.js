@@ -1,11 +1,23 @@
 const Pool = require('mysql')
+const { DATABASE, HOST_DB, PASSWORD_DB, USER_DB } = require('./config').envs;
+const { Validators } = require('./config');
+
 const pool = Pool.createConnection({
-	host:'tux-server.ddns.net',
-	user: 'mipap',
-	password: 'mipape281003pol',
-	database: 'law_tech',
+	host: HOST_DB,
+	user: USER_DB,
+	password: PASSWORD_DB,
+	database: DATABASE,
 	port: 3306,
 })
+
+const asyncQuery = async(sqlQuery) => {
+	return new Promise((resolve, reject) => {
+		pool.query (sqlQuery, (error, results) => {
+			if (error) return reject(error);
+			resolve(results);
+		});
+	})
+}
 
 const createciudadano = (request, response) => {
 	const { idRol, Nombre, ApellidoPaterno, ApellidoMaterno, Telefono, Correo, Contrasena, Direccion } = request.body
@@ -75,30 +87,85 @@ const createcomentario = (request, response) => {
 const login = async(request, response) => {
 	const { Correo, Contrasena } = request.body;
 	
-	let results = await new Promise((resolve, reject) => {
-		pool.query (`SELECT * FROM tbciudadano WHERE Correo = '${Correo}'`, (error, results) => {
-			if (error){
-				reject(error);
-			}
-			resolve(results)
-		});
-	})
-
-	if(!results[0]) {
-		results = await new Promise((resolve, reject) => {
-			pool.query (`SELECT * FROM tbabogado WHERE Correo = '${Correo}'`, (error, results) => {
-				if (error){
-					reject(error);
-				}
-				resolve(results)
-			});
-		})
-	}
+	let results = await asyncQuery(`SELECT * FROM tbciudadano WHERE Correo = '${Correo}'`);
+	if (!results[0]) results = await asyncQuery(`SELECT * FROM tbabogado WHERE Correo = '${Correo}'`);
 
 	if(!results[0]) return response.status(404).json({msg: "Credenciales no validas"});
 	if(results[0].Contrasena !== Contrasena) return response.status(404).json({msg: "Credenciales no validas"});
 	response.status(201).json({msg: "Autenticación exitosa"})
 }
+
+const getCitasByDates = async(req, res) => {
+	const { fechaInicio, fechaFin } = req.query;
+
+	try {
+		const validators = new Validators({ fechaFin, fechaInicio });
+		validators.isDate("fechaInicio");
+		validators.isDate("fechaFin");
+
+		const primerIntervalo = validators.data.fechaInicio.split('T')[0];
+		const segundoIntervalo = validators.data.fechaFin.split('T')[0];
+		const results = await asyncQuery(`
+			SELECT c.idCita, c.FechaReservacion, cl.Nombre, cl.ApellidoPaterno, cl.ApellidoMaterno
+				FROM tbcita c
+				JOIN tbciudadano cl ON c.idCiudadano = cl.idCiudadano
+				WHERE c.FechaReservacion BETWEEN '${primerIntervalo}' AND '${segundoIntervalo}';
+		`);
+
+		res.json({ results });
+	} catch (error) {
+		console.log(error);
+		return res.status(404).json({ error: error })		
+	}
+}
+
+const getCitaByDate = async(req, res) => {
+	const { fecha, id } = req.params;
+
+	try {
+		const validators = new Validators({ id, fecha });
+		validators.isRequired("id", "fecha");
+		validators.isDate("fecha");
+		validators.isNumber("id")
+
+		const results = await asyncQuery(`
+			SELECT c.idCita, c.FechaReservacion, cl.Nombre, cl.ApellidoPaterno, cl.ApellidoMaterno
+			FROM tbcita c
+			JOIN tbciudadano cl ON c.idCiudadano = cl.idCiudadano
+			JOIN tbabogado a ON c.idAbogado = a.idAbogado
+			WHERE DATE(c.FechaReservacion) = '${fecha}'
+			AND a.idAbogado = ${id};
+		`);
+
+		res.json({ results });
+	} catch (error) {
+		console.log(error);
+		return res.status(404).json({ error: error })		
+	}
+}
+
+const getCitaByIdAbogado = async(req, res) => {
+	const { id } = req.params;
+
+	try {
+		const validators = new Validators({ id });
+		validators.isNumber("id")
+
+		const results = await asyncQuery(` 
+			SELECT c.idCita, c.FechaReservacion, cl.Nombre, cl.ApellidoPaterno, cl.ApellidoMaterno
+			FROM tbcita c
+			JOIN tbciudadano cl ON c.idCiudadano = cl.idCiudadano
+			JOIN tbabogado a ON c.idAbogado = a.idAbogado
+			WHERE a.idAbogado = ${id};
+		`);
+
+		res.json({ results });
+	} catch (error) {
+		console.log(error);
+		return res.status(404).json({ error: error })		
+	}
+}
+
 
 module.exports = {
      createciudadano,
@@ -107,7 +174,9 @@ module.exports = {
      createcita,
      createcomentario,
 	 login,
+	 getCitasByDates,
+	 getCitaByDate,
+	 getCitaByIdAbogado,
 }
-
 
 

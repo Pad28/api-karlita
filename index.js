@@ -4,14 +4,9 @@ const https = require('https');
 const express = require('express');
 const bodyParser = require('body-parser');
 const db = require('./queries.js')
-
-const { config } = require("dotenv");
-const { get } = require("env-var");
-config();
+const { PORT, IS_HTTPS } = require("./config.js").envs;
 
 const app = express();
-const isHttps = get("IS_HTTPS").required().asBool();
-const port = get("PORT").required().asPortNumber();
 
 app.use(express.json());
 app.use(
@@ -19,6 +14,21 @@ app.use(
         extended: true,
     })
 );
+
+
+//create tbciudadano
+app.post('/law_tech/ciudadano', db.createciudadano);
+app.post('/law_tech/abogado', db.createabogado);
+app.post('/law_tech/admin', db.createadmin);
+
+app.post('/law_tech/cita', db.createcita);
+app.get('/law_tech/cita/:fecha/:id', db.getCitaByDate);
+app.get('/law_tech/cita/:id', db.getCitaByIdAbogado);
+app.get('/law_tech/citaByDates', db.getCitasByDates);
+
+app.post('/law_tech/comentario', db.createcomentario);
+app.post("/law_tech/auth/login", db.login);
+
 
 // GET Request to root URL (/)
 app.get('/', (request, response) => {
@@ -29,25 +39,17 @@ app.get('*', (request, response) => {
     response.status(404).json({ msg: "404 | No encontrado" });
 });
 
-//create tbciudadano
-app.post('/law_tech/ciudadano', db.createciudadano);
-app.post('/law_tech/abogado', db.createabogado);
-app.post('/law_tech/admin', db.createadmin);
-app.post('/law_tech/cita', db.createcita);
-app.post('/law_tech/comentario', db.createcomentario);
 
-app.post("/law_tech/auth/login", db.login)
-
-if(!isHttps) {
-    app.listen(port, () => console.log(`Server listening in port ${port}`));
+if(!IS_HTTPS) {
+    app.listen(PORT, () => console.log(`Server listening in port ${PORT}`));
 } else {
     const httpsOptions = {
         key: fs.readFileSync("/etc/letsencrypt/live/tux-server.ddns.net/privkey.pem"),
         cert: fs.readFileSync("/etc/letsencrypt/live/tux-server.ddns.net/fullchain.pem"),
     };
                 
-    https.createServer(httpsOptions, app).listen(port, () => {
-        console.log(`Server listening in port ${port}`)
+    https.createServer(httpsOptions, app).listen(PORT, () => {
+        console.log(`Server listening in port ${PORT}`)
     });
 }
 
