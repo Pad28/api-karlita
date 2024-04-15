@@ -87,12 +87,23 @@ const createcomentario = (request, response) => {
 const login = async(request, response) => {
 	const { Correo, Contrasena } = request.body;
 	
-	let results = await asyncQuery(`SELECT * FROM tbciudadano WHERE Correo = '${Correo}'`);
-	if (!results[0]) results = await asyncQuery(`SELECT * FROM tbabogado WHERE Correo = '${Correo}'`);
+	let results = await asyncQuery(`
+		SELECT c.*, r.idRol, r.Descripcion as DescripcionRol
+		FROM tbciudadano c
+		JOIN tbrol r ON c.idRol = r.idRol
+		WHERE c.Correo = '${Correo}'
+	`);
+	
+	if (!results[0]) results = await asyncQuery(`
+		SELECT a.*, r.idROl, r.Descripcion as DescripcionRol
+		FROM tbabogado a
+		JOIN tbrol r ON a.idRol = r.idRol
+		WHERE a.Correo = '${Correo}'
+	`);
 
 	if(!results[0]) return response.status(404).json({msg: "Credenciales no validas"});
 	if(results[0].Contrasena !== Contrasena) return response.status(404).json({msg: "Credenciales no validas"});
-	response.status(201).json({msg: "Autenticación exitosa"})
+	response.status(201).json({msg: "Autenticación exitosa", results})
 }
 
 const getCitasByDates = async(req, res) => {

@@ -32,7 +32,6 @@ app.get('/law_tech/citaByDates', db.getCitasByDates);
 app.post('/law_tech/comentario', db.createcomentario);
 app.post("/law_tech/auth/login", db.login);
 
-// GET Request to root URL (/)
 app.get('/', (request, response) => {
     response.json({ Bienvenido: "Creando API con node.js, express y postgresql" });
 });
