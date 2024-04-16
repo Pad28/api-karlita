@@ -61,7 +61,7 @@ const createcita = (request, response) => {
 	const idCiu_int = parseInt(idCiudadano)
 	const idAbo_int = parseInt(idAbogado)
 	const idSta_int = parseInt(idStatus)
-	pool.query (`INSERT INTO tbcita (FechaCreacion, FechaReservacion, HoraCita, Direccion, Descripcion, idCiudadano, idAbogado, idStatus) VALUES ("${FechaCreacion}", "${FechaReservacion}", "${HoraCita}", "${Direccion}", "${Descripcion}", ${idCiu_int}, ${idAbo_int}, ${idSta_int})`, (error, results) => {
+	pool.query (`INSERT INTO tbcita (FechaCreacion, FechaReservacion, HoraCita, Direccion, Descripcion, idCiudadano, idAbogado, idStatus) VALUES ('${FechaCreacion}', '${FechaReservacion}', '${HoraCita}', '${Direccion}', ${Descripcion}", '${idCiu_int}', ${idAbo_int}, ${idSta_int})`, (error, results) => {
 	if (error){
 	   throw error
 	}
