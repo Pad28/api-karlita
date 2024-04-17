@@ -282,6 +282,47 @@ const updateCiudadano = async (req, res) => {
     }
 };
 
+const getAbogado = async(req, res) => {
+	const { id } = req.params;
+	try {
+		const validators = new Validators({ id });
+		validators.isNumber("id")
+
+		const results = await asyncQuery(` 
+			SELECT * FROM tbabogado WHERE idAbogado = ${id};
+		`);
+
+		res.json({ results });
+	} catch (error) {
+		console.log(error);
+		return res.status(404).json({ error: error })		
+	}
+}
+
+const updateAbogado = async (req, res) => {
+    const { body } = req;
+    const { id } = req.params;
+    
+    try {
+        const update = await asyncQuery(`
+            UPDATE tbabogado SET 
+            Nombre = '${body.Nombre ? body.Nombre : ''}',
+            ApellidoPaterno = '${body.ApellidoPaterno ? body.ApellidoPaterno : ''}',
+            ApellidoMaterno = '${body.ApellidoMaterno ? body.ApellidoMaterno : ''}',
+            Telefono = '${body.Telefono ? body.Telefono : ''}',
+            Correo = '${body.Correo ? body.Correo : ''}',
+            Contrasena = '${body.Contrasena ? body.Contrasena : ''}',
+            Direccion = '${body.Direccion ? body.Direccion : ''}'
+            WHERE idAbogado = ${id};
+        `);
+
+        res.status(200).json({ message: "Abogado actualizado correctamente" });
+    } catch (error) {
+        console.log(error);
+        return res.status(404).json({ error: error });
+    }
+};
+
 
 module.exports = {
      createciudadano,
@@ -297,7 +338,9 @@ module.exports = {
 	 aceptarCitas,
 	 rechazarCita,
 	 getCiudadano,
-	 updateCiudadano
+	 updateCiudadano,
+	 getAbogado,
+	 updateAbogado
 }
 
 

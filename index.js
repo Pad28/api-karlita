@@ -23,6 +23,8 @@ app.get('/law_tech/ciudadano/:id', db.getCiudadano);
 
 app.post('/law_tech/abogado', db.createabogado);
 app.get('/law_tech/abogado/:especialidad', db.getAbogadoByEspecialidad);
+app.get('/law_tech/abogado/search/:id', db.getAbogado);
+app.post('/law_tech/abogado/update/:id', db.updateAbogado);
 
 app.post('/law_tech/admin', db.createadmin);
 
