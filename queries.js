@@ -238,6 +238,23 @@ const getAbogadoByEspecialidad = async(req, res) => {
 	}
 }
 
+const getCiudadano = async(req, res) => {
+	const { id } = req.params;
+	try {
+		const validators = new Validators({ id });
+		validators.isNumber("id")
+
+		const results = await asyncQuery(` 
+			SELECT * FROM tbciudadano WHERE idCiudadano = ${id};
+		`);
+
+		res.json({ results });
+	} catch (error) {
+		console.log(error);
+		return res.status(404).json({ error: error })		
+	}
+}
+
 module.exports = {
      createciudadano,
      createabogado,
@@ -250,7 +267,8 @@ module.exports = {
 	 getCitaByIdAbogado,
 	 getAbogadoByEspecialidad,
 	 aceptarCitas,
-	 rechazarCita
+	 rechazarCita,
+	 getCiudadano
 }
 
 

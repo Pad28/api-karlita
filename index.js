@@ -18,6 +18,8 @@ app.use(
 
 //create tbciudadano
 app.post('/law_tech/ciudadano', db.createciudadano);
+app.get('/law_tech/ciudadano/:id', db.getCiudadano);
+
 app.post('/law_tech/abogado', db.createabogado);
 app.get('/law_tech/abogado/:especialidad', db.getAbogadoByEspecialidad);
 
