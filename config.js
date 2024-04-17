@@ -63,6 +63,7 @@ class Validators {
     isDate(key) {
         this.isRequired(key);
         const newDate = new Date(this.data[key]);
+        console.log(newDate);
         if (newDate.toString() === 'Invalid Date') throw `${key} no es una fecha válida`;
         this.data[key] = newDate.toISOString();
     }

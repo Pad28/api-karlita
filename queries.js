@@ -111,11 +111,13 @@ const getCitasByDates = async(req, res) => {
 
 	try {
 		const validators = new Validators({ fechaFin, fechaInicio });
+		console.log(validators.data);
 		validators.isDate("fechaInicio");
 		validators.isDate("fechaFin");
 
-		const primerIntervalo = validators.data.fechaInicio.split('T')[0];
-		const segundoIntervalo = validators.data.fechaFin.split('T')[0];
+		let primerIntervalo = validators.data.fechaInicio.split('T')[0];
+		console.log(primerIntervalo);
+		let segundoIntervalo = validators.data.fechaFin.split('T')[0];
 		const results = await asyncQuery(`
 			SELECT c.idCita, c.FechaReservacion, cl.Nombre, cl.ApellidoPaterno, cl.ApellidoMaterno
 				FROM tbcita c
@@ -167,7 +169,45 @@ const getCitaByIdAbogado = async(req, res) => {
 			FROM tbcita c
 			JOIN tbciudadano cl ON c.idCiudadano = cl.idCiudadano
 			JOIN tbabogado a ON c.idAbogado = a.idAbogado
-			WHERE a.idAbogado = ${id};
+			WHERE a.idAbogado = ${id} AND c.idStatus = 2;
+		`);
+
+		res.json({ results });
+	} catch (error) {
+		console.log(error);
+		return res.status(404).json({ error: error })		
+	}
+}
+
+const aceptarCitas = async(req, res) => {
+	const { id } = req.params;
+	try {
+		const validators = new Validators({ id });
+		validators.isNumber("id")
+		
+		const results = await asyncQuery(` 
+		UPDATE tbcita
+		SET idStatus = 1
+		WHERE idCita = ${validators.data.id};
+		`);
+
+		res.json({ results });
+	} catch (error) {
+		console.log(error);
+		return res.status(404).json({ error: error })		
+	}
+}
+
+const rechazarCita = async(req, res) => {
+	const { id } = req.params;
+	try {
+		const validators = new Validators({ id });
+		validators.isNumber("id")
+
+		const results = await asyncQuery(` 
+		UPDATE tbcita
+		SET idStatus = 3
+		WHERE idCita = ${validators.data.id};
 		`);
 
 		res.json({ results });
@@ -209,6 +249,8 @@ module.exports = {
 	 getCitaByDate,
 	 getCitaByIdAbogado,
 	 getAbogadoByEspecialidad,
+	 aceptarCitas,
+	 rechazarCita
 }
 
 

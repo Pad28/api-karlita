@@ -27,6 +27,9 @@ app.post('/law_tech/cita', db.createcita);
 app.get('/law_tech/cita/:fecha/:id', db.getCitaByDate);
 app.get('/law_tech/cita/:id', db.getCitaByIdAbogado);
 
+app.post('/law_tech/cita/aceptar/:id', db.aceptarCitas);
+app.post('/law_tech/cita/rechazar/:id', db.rechazarCita);
+
 app.get('/law_tech/citaByDates', db.getCitasByDates);
 
 app.post('/law_tech/comentario', db.createcomentario);
