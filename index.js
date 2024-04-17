@@ -18,6 +18,7 @@ app.use(
 
 //create tbciudadano
 app.post('/law_tech/ciudadano', db.createciudadano);
+app.post('/law_tech/ciudadano/update/:id', db.updateCiudadano);
 app.get('/law_tech/ciudadano/:id', db.getCiudadano);
 
 app.post('/law_tech/abogado', db.createabogado);
